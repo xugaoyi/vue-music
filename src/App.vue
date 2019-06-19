@@ -2,7 +2,9 @@
   <div id="app">
     <m-header></m-header>
     <tad></tad>
-    <router-view></router-view>
+    <keep-alive> <!-- 添加此标签可防止在切换页面时重新加载页面 -->
+      <router-view></router-view>
+    </keep-alive>
   </div>
 </template>
 
