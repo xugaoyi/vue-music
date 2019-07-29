@@ -1,3 +1,6 @@
+/**
+ * store入口文件（在main.js绑定此入口）
+ */
 import Vue from 'vue'
 import Vuex from 'vuex'
 import * as actions from './actions' // 这种语法可以这样获取里面的对象：actions.对象 ，不用像和ES6解构赋值 {对象1，对象2}一个个去写对象名称

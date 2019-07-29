@@ -16,7 +16,7 @@
     <div class="bg-layer" ref="layer"></div>
     <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list"> <!-- :data="songs"用于计算高度 ref标签用于获取 this.$refs.list -->
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list @select="selectItem" :songs="songs"></song-list>
       </div>
       <div class="loading-container" v-show="!songs.length">
         <loading></loading>
@@ -30,6 +30,7 @@ import Scroll from '@/base/scroll/scroll'
 import SongList from '@/base/song-list/song-list'
 import Loading from '@/base/loading/loading'
 import { prefixStyle } from '@/common/js/dom'
+import { mapActions } from 'vuex' // 调用actions  语法糖
 
 const RESERVED_HEIGHT = 40
 const transform = prefixStyle('transform')
@@ -77,7 +78,16 @@ export default {
     },
     back() {
       this.$router.back()
-    }
+    },
+    selectItem(item, index) { // 点击歌曲>设置vuex>播放
+      this.selectPlay({ // 调用actions里的 selectPlay方法
+        list: this.songs,
+        index
+      })
+    },
+    ...mapActions([ // 映射 this.selectItem方法到actions
+      'selectPlay'
+    ])
   },
   watch: {
     scrollY(newY) {

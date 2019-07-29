@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     selectSinger(singer) {
-      this.$router.push({
+      this.$router.push({ // 跳转到歌手详情路由
         path: `/singer/${singer.id}`
       })
       this.setSinger(singer) // 调用映射方法 往state传入值

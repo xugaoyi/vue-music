@@ -25,7 +25,7 @@ export default {
       return this.singer.avatar
     },
     ...mapGetters([
-      'singer' // 这个signer对应到getters.js里面的signer
+      'singer' // 这个signer对应到getters.js里面的signer，获取到singer数据
     ])
   },
   created() {
