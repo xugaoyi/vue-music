@@ -55,22 +55,23 @@
             <span class="dot"></span>
           </div>
           <div class="progress-wrapper"><!-- 播放进度条 -->
-            <span class="time time-l"></span>
+            <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent"></progress-bar>
             </div>
-            <span class="time time-r"></span>
+            <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators"><!-- 操作按钮 -->
             <div class="icon i-left">
               <i class="icon-sequence"></i>
             </div>
-            <div class="icon i-left">
+            <div class="icon i-left" :class="disableCls">
               <i @click="prev" class="icon-prev"></i>
             </div>
-            <div class="icon i-center">
+            <div class="icon i-center" :class="disableCls">
               <i @click="togglePlaying" :class="playIcon"></i>
             </div>
-            <div class="icon i-right">
+            <div class="icon i-right" :class="disableCls">
               <i @click="next" class="icon-next"></i>
             </div>
             <div class="icon i-right">
@@ -104,7 +105,7 @@
     <!-- 迷你播放器 e-->
 
     <!-- html5播放音频 s-->
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error"></audio>
+    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
     <!-- html5播放音频 e-->
   </div>
 </template>
@@ -113,13 +114,15 @@
 import { mapGetters, mapMutations } from 'vuex' // 获取/设置vuex的数据 语法糖
 import animations from 'create-keyframe-animation' // 动画库依赖https://github.com/HenrikJoreteg/create-keyframe-animation
 import { prefixStyle } from '@/common/js/dom' // js操作css3样式前缀的封装
+import ProgressBar from '@/base/progress-bar/progress-bar' // 进度条组件
 
 const transform = prefixStyle('transform')
 
 export default {
   data() {
     return {
-      songReady: false
+      songReady: false,
+      currentTime: 0 // 当前播放时间
     }
   },
   computed: {
@@ -131,6 +134,12 @@ export default {
     },
     miniIcon() {
       return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+    },
+    disableCls() {
+      return this.songReady ? '' : 'disable'
+    },
+    percent() { // 获取播放比例
+      return this.currentTime / this.currentSong.duration
     },
     ...mapGetters([ // 获取vuex数据
       'fullScreen', // 播放器展开收起(大播放与小播放器)
@@ -218,11 +227,28 @@ export default {
       }
       this.songReady = false
     },
-    ready() {
+    ready() { // 当音频已准备好时
       this.songReady = true // 防止快速点击时报错
     },
-    error() {
-
+    error() { // 音频加载出错时
+      this.songReady = true
+    },
+    updateTime(e) { // 播放进度更新时
+      this.currentTime = e.target.currentTime
+    },
+    format(interval) { // 时间格式转换
+      interval = interval | 0 // 向下取整
+      const minute = interval / 60 | 0
+      const second = this._pad(interval % 60)
+      return `${minute}:${second}`
+    },
+    _pad(num, n = 2) { // 不满n位数时补 0
+      let len = num.toString().length
+      while (len < n) {
+        num = '0' + num
+        len++
+      }
+      return num
     },
     _getPosAndScale() { // 获取大小唱片图片的位置 (计算两个图片中心点的位置)
       const targetWidth = 40
@@ -253,6 +279,9 @@ export default {
         newPlaying ? audio.play() : audio.pause()
       })
     }
+  },
+  components: {
+    ProgressBar
   }
 }
 </script>
