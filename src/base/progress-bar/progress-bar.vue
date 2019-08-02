@@ -1,5 +1,5 @@
 <template>
-  <div class="progress-bar" ref="progressBar">
+  <div class="progress-bar" ref="progressBar" @click="progressClick">
     <div class="bar-inner">
       <div class="progress" ref="progress"></div>
       <div class="progress-btn-wrapper" ref="progressBtn"
@@ -22,7 +22,7 @@ const transform = prefixStyle('transform')
 export default {
   props: {
     percent: {
-      type:Number,
+      type: Number,
       default: 0
     }
   },
@@ -31,22 +31,49 @@ export default {
   },
   methods: {
     progressTouchStart(e) {
-
+      this.touch.initiated = true
+      this.touch.startX = e.touches[0].pageX // 开始触碰时的x坐标
+      this.touch.left = this.$refs.progress.clientWidth // 进度条已经偏移的量
     },
     progressTouchMove(e) {
-
+      if (!this.touch.initiated) {
+        return
+      }
+      const deltaX = e.touches[0].pageX - this.touch.startX // 纵向偏移量
+      // offsetWidth 进度条跟随手指纵向偏移的值
+      const offsetWidth = Math.min(this._getBarWidth(), Math.max(0, this.touch.left + deltaX))
+      this._offset(offsetWidth)
     },
-    progressTouchEnd(e) {
-
+    progressTouchEnd() {
+      this.touch.initiated = false
+      this._triggerPercent()
+    },
+    progressClick(e) { // 点击进度条改变进度
+      // 这里当点击 progressBtn 是，e.offsetX 获取不对
+      // this._offset(e.offsetX)
+      const rect = this.$refs.progressBar.getBoundingClientRect() // getBoundingClientRect用于获取某个元素相对于视窗的位置集合。集合中有top, right, bottom, left等属性
+      console.log(rect)
+      const offsetWidth = e.pageX - rect.left
+      this._offset(offsetWidth)
+      this._triggerPercent()
+    },
+    _triggerPercent() { // 告诉父组件 进度已改变 从而改变歌曲播放进度
+      const percent = this.$refs.progress.clientWidth / this._getBarWidth()
+      this.$emit('percentChange', percent) // 向父组件派发事件
+    },
+    _offset(offsetWidth) { // 执行进度条样式变化
+      this.$refs.progress.style.width = `${offsetWidth}px`
+      this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+    },
+    _getBarWidth() { // 获取整个进度条宽度
+      return this.$refs.progressBar.clientWidth - progressBtnWidth
     }
   },
   watch: {
-    percent(newPercent) {
-      if (newPercent >= 0) {
-        const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth
-        const offsetWidth = newPercent * barWidth
-        this.$refs.progress.style.width = `${offsetWidth}px`
-        this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+    percent(newPercent) { // 进度条动画
+      if (newPercent >= 0 && !this.touch.initiated) {
+        const offsetWidth = newPercent * this._getBarWidth()
+        this._offset(offsetWidth)
       }
     }
   }

@@ -4,8 +4,8 @@ import axios from 'axios'
 
 const debug = process.env.NODE_ENV !== 'production'
 
-export function getLyric(mid) {
-  const url = debug ? '/api/lyric' : 'http://ustbhuangyi.com/music/api/lyric' // /api/lyric 是在webpack.dev.conf.js配置的
+export function getLyric(mid) { // 歌词
+  const url = debug ? '/api/lyric' : 'http://ustbhuangyi.com/music/api/lyric' // /api/lyric 是在webpack.dev.conf.js配置的代理地址
 
   const data = Object.assign({}, commonParams, {
     songmid: mid,
@@ -25,7 +25,7 @@ export function getLyric(mid) {
 }
 
 export function getSongsUrl(songs) {
-  const url = debug ? '/api/getPurlUrl' : 'http://ustbhuangyi.com/music/api/getPurlUrl' // /api/getPurlUrl 是在webpack.dev.conf.js配置的
+  const url = debug ? '/api/getPurlUrl' : 'http://ustbhuangyi.com/music/api/getPurlUrl' // /api/getPurlUrl 是在webpack.dev.conf.js配置的代理地址
 
   let mids = []
   let types = []

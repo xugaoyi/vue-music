@@ -1,4 +1,4 @@
-// 获取歌手详情数据封装
+// 获取歌曲相关数据封装
 
 import { getLyric, getSongsUrl } from '@/api/song'
 import { ERR_OK } from '@/api/config'
@@ -17,7 +17,7 @@ export default class Song {
     this.url = url
   }
 
-  getLyric() {
+  getLyric() { // 获取歌词
     if (this.lyric) {
       return Promise.resolve(this.lyric)
     }

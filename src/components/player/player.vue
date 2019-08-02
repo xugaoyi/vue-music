@@ -57,13 +57,13 @@
           <div class="progress-wrapper"><!-- 播放进度条 -->
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
-              <progress-bar :percent="percent"></progress-bar>
+              <progress-bar :percent="percent" @percentChange="onProgressBarChange"></progress-bar>
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators"><!-- 操作按钮 -->
-            <div class="icon i-left">
-              <i class="icon-sequence"></i>
+            <div class="icon i-left" @click="changeMode">
+              <i :class="iconMode"></i>
             </div>
             <div class="icon i-left" :class="disableCls">
               <i @click="prev" class="icon-prev"></i>
@@ -95,7 +95,9 @@
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i @click.stop="togglePlaying" :class="miniIcon"></i> <!-- .stop 阻止冒泡事件 防止触发父级的open事件 -->
+          <progress-circle :radius="radius" :percent="percent">
+            <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i> <!-- .stop 阻止冒泡事件 防止触发父级的open事件 -->
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -105,7 +107,7 @@
     <!-- 迷你播放器 e-->
 
     <!-- html5播放音频 s-->
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
+    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
     <!-- html5播放音频 e-->
   </div>
 </template>
@@ -115,6 +117,10 @@ import { mapGetters, mapMutations } from 'vuex' // 获取/设置vuex的数据 �
 import animations from 'create-keyframe-animation' // 动画库依赖https://github.com/HenrikJoreteg/create-keyframe-animation
 import { prefixStyle } from '@/common/js/dom' // js操作css3样式前缀的封装
 import ProgressBar from '@/base/progress-bar/progress-bar' // 进度条组件
+import ProgressCircle from '@/base/progress-Circle/progress-Circle' // 圆形进度条组件
+import { playMode } from '@/common/js/config' // 播放模式语义化配置
+import { shuffle } from '@/common/js/util' // 随机打乱数组方法
+import Lyric from 'lyric-parser' // 歌词解析器
 
 const transform = prefixStyle('transform')
 
@@ -122,12 +128,17 @@ export default {
   data() {
     return {
       songReady: false,
-      currentTime: 0 // 当前播放时间
+      currentTime: 0, // 当前播放时间
+      radius: 32, // 圆形进度条宽高
+      currentLyric: null
     }
   },
   computed: {
     cdCls() {
       return this.playing ? 'play' : 'play pause'
+    },
+    iconMode() {
+      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
     },
     playIcon() {
       return this.playing ? 'icon-pause' : 'icon-play'
@@ -143,10 +154,12 @@ export default {
     },
     ...mapGetters([ // 获取vuex数据
       'fullScreen', // 播放器展开收起(大播放与小播放器)
-      'playlist', // 歌曲播放列表
+      'playlist', // 歌曲播放列表（随播放模式改变）
       'currentSong', // 当前播放歌曲数据
       'playing', // 是否播放
-      'currentIndex' // 当前播放索引
+      'currentIndex', // 当前播放索引
+      'mode', // 播放模式
+      'sequenceList' // 歌曲原始列表
     ])
   },
   methods: {
@@ -199,6 +212,17 @@ export default {
       }
       this.setPlayingState(!this.playing)
     },
+    end() { // 音频播放结束时
+      if (this.mode === playMode.loop) {
+        this._loop()
+      } else {
+        this.next()
+      }
+    },
+    _loop() {
+      this.$refs.audio.currentTime = 0
+      this.$refs.audio.play()
+    },
     prev() { // 上一曲
       if (!this.songReady) { // 防止快速点击时报错
         return
@@ -242,6 +266,36 @@ export default {
       const second = this._pad(interval % 60)
       return `${minute}:${second}`
     },
+    onProgressBarChange(percent) { // 拖动进度条改变播放进度 （audio.currentTime为可读写属性）
+      this.$refs.audio.currentTime = this.currentSong.duration * percent
+      if (!this.playing) {
+        this.togglePlaying()
+      }
+    },
+    changeMode() { // 切换播放模式
+      const mode = (this.mode + 1) % 3
+      this.setPlayMode(mode)
+      let list = null
+      if (mode === playMode.random) { // 随机
+        list = shuffle(this.sequenceList)
+      } else { // 顺序播放 与 单曲播放 （单曲播放不在这里判断，单曲播放由歌曲播放结束时重新播放本歌曲）
+        list = this.sequenceList
+      }
+      this.resetCurrentIndex(list) // 防止因为改变模式而改变当前播放的歌曲
+      this.setPlaylist(list)
+    },
+    resetCurrentIndex(list) { // 调整当前播放索引
+      let index = list.findIndex((item) => { // 获取当前歌曲的索引
+        return item.id === this.currentSong.id
+      })
+      this.setCurrentIndex(index)
+    },
+    getLyric() { // 获取并解析歌词
+      this.currentSong.getLyric().then((lyric) => {
+        this.currentLyric = new Lyric(lyric)
+        console.log(this.currentLyric)
+      })
+    },
     _pad(num, n = 2) { // 不满n位数时补 0
       let len = num.toString().length
       while (len < n) {
@@ -264,13 +318,19 @@ export default {
     ...mapMutations({ // 映射 提交mutations
       setFullScreen: 'SET_FULL_SCREEN',
       setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX'
+      setCurrentIndex: 'SET_CURRENT_INDEX',
+      setPlayMode: 'SET_PLAY_MODE',
+      setPlaylist: 'SET_PLAYLIST'
     })
   },
   watch: {
-    currentSong() {
+    currentSong(newSong, oldSong) { // watch里面的方法 参数1 为新的值，参数2 为原本的值
+      if (newSong.id === oldSong.id) { // 防止切换播放模式时自动播放歌曲
+        return
+      }
       this.$nextTick(() => { // DOM 更新结束后
         this.$refs.audio.play() // 播放音频
+        this.getLyric() // 获取歌词
       })
     },
     playing(newPlaying) { // 执行播放暂停音频
@@ -281,7 +341,8 @@ export default {
     }
   },
   components: {
-    ProgressBar
+    ProgressBar,
+    ProgressCircle
   }
 }
 </script>
