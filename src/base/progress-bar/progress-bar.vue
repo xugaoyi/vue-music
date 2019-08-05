@@ -52,7 +52,6 @@ export default {
       // 这里当点击 progressBtn 是，e.offsetX 获取不对
       // this._offset(e.offsetX)
       const rect = this.$refs.progressBar.getBoundingClientRect() // getBoundingClientRect用于获取某个元素相对于视窗的位置集合。集合中有top, right, bottom, left等属性
-      console.log(rect)
       const offsetWidth = e.pageX - rect.left
       this._offset(offsetWidth)
       this._triggerPercent()

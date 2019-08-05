@@ -12,6 +12,8 @@ const state = {
   playlist: [], // 歌曲播放列表（随播放模式改变的播放列表）
   sequenceList: [], // 歌曲顺序播放列表
   mode: playMode.sequence, // 播放模式
-  currentIndex: -1 // 当前播放歌曲索引
+  currentIndex: -1, // 当前播放歌曲索引
+
+  disc: {} // 歌但详情页内单个歌手数据
 }
 export default state

@@ -1,7 +1,7 @@
 <template>
-  <div class="singer">
-    <list-view @select="selectSinger" :data="singers"></list-view>
-    <router-view></router-view>
+  <div class="singer" ref="singer">
+    <list-view @select="selectSinger" :data="singers" ref="list"></list-view>
+    <router-view></router-view>  <!-- 二级路由容器，即歌手详情页 -->
   </div>
 </template>
 
@@ -10,12 +10,14 @@ import { getSingerList } from '@/api/singer'
 import { ERR_OK } from '@/api/config'
 import Singer from 'common/js/singer'
 import ListView from '@/base/listview/listview'
-import { mapMutations } from 'vuex' // mapMutations 设置vuex数据的 语法糖
+import { mapMutations } from 'vuex' // mapMutations 设置vuex数据的 语法糖‘
+import { playlistMixin } from 'common/js/mixin'
 
 const HOT_NAME = '热门'
 const HOT_SINGER_LEN = 10
 
 export default {
+  mixins: [playlistMixin],
   data() {
     return {
       singers: []
@@ -25,6 +27,11 @@ export default {
     this._getSingerList()
   },
   methods: {
+    handlePlaylist(playlist) { // 处理小播放器遮挡列表的问题
+      const bottom = playlist.length > 0 ? '60px' : ''
+      this.$refs.singer.style.bottom = bottom
+      this.$refs.list.refresh() // 更新scroll组件高度
+    },
     selectSinger(singer) {
       this.$router.push({ // 跳转到歌手详情路由
         path: `/singer/${singer.id}`
