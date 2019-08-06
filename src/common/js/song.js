@@ -35,7 +35,7 @@ export default class Song {
   }
 }
 
-export function createSong(musicData) {
+export function createSong(musicData) { // 对歌曲数据格式改装
   return new Song({
     id: musicData.songid,
     mid: musicData.songmid,

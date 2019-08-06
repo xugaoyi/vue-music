@@ -352,6 +352,7 @@ export default {
     // 以下三个Touch为切换cd与歌词卡片的操作
     middleTouchStart(e) {
       this.touch.initiated = true
+      this.touch.moved = false // 用来判断是否是一次移动
       const touch = e.touches[0]
       this.touch.startX = touch.pageX
       this.touch.startY = touch.pageY
@@ -366,6 +367,9 @@ export default {
       if (Math.abs(deltaY) > Math.abs(deltaX)) { // 纵向滑动时
         return
       }
+      if (!this.touch.moved) {
+        this.touch.moved = true
+      }
       const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
       const offsetWidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
       this.touch.percent = Math.abs(offsetWidth / window.innerWidth)
@@ -375,6 +379,9 @@ export default {
       this.$refs.middleL.style[transitionDuration] = 0
     },
     middleTouchEnd() {
+      if (!this.touch.moved) {
+        return
+      }
       let offsetWidth
       let opacity
       if (this.currentShow === 'cd') {
@@ -401,6 +408,7 @@ export default {
       this.$refs.lyricList.$el.style[transitionDuration] = `${time}ms`
       this.$refs.middleL.style.opacity = opacity
       this.$refs.middleL.style[transitionDuration] = `${time}ms`
+      this.touch.initiated = false
     },
     _pad(num, n = 2) { // 不满n位数时补 0
       let len = num.toString().length

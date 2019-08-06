@@ -41,7 +41,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         })
       })
 
-      app.get('/api/getCdInfo', function (req, res) {
+      app.get('/api/getCdInfo', function (req, res) { // 获取歌单内的歌曲列表
         const url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
         axios.get(url, {
           headers: {

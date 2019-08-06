@@ -6,10 +6,10 @@
 
 <script type="text/ecmascript-6">
 import MusicList from '@/components/music-list/music-list'
-// import { getSongList } from '@/api/recommend'
-// import { ERR_OK } from '@/api/config'
+import { getSongList } from '@/api/recommend' // 获取歌曲列表接口
+import { ERR_OK } from '@/api/config'
 import { mapGetters } from 'vuex'
-// import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
+import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
 
 export default {
   computed: {
@@ -26,6 +26,33 @@ export default {
   data() {
     return {
       songs: []
+    }
+  },
+  created() {
+    this._getSongList()
+  },
+  methods: {
+    _getSongList() {
+      if (!this.disc.dissid) {
+        this.$router.push('/recommend')
+        return
+      }
+      getSongList(this.disc.dissid).then((res) => {
+        if (res.code === ERR_OK) {
+          processSongsUrl(this._normalizeSongs(res.cdlist[0].songlist)).then((songs) => {
+            this.songs = songs
+          })
+        }
+      })
+    },
+    _normalizeSongs(list) {
+      let ret = []
+      list.forEach((musicData) => {
+        if (isValidMusic(musicData)) {
+          ret.push(createSong(musicData))
+        }
+      })
+      return ret
     }
   },
   components: {
