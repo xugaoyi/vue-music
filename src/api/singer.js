@@ -4,7 +4,7 @@ import { commonParams, options } from './config'
 export function getSingerList() {
   const url = 'https://c.y.qq.com/v8/fcg-bin/v8.fcg'
 
-  const data = Object.assign({}, commonParams, { // Object.assign 对象参数的拼接
+  const data = Object.assign({}, commonParams, { // Object.assign 对象参数的拼接, 使用commonParams与后面的对象拼接参数，如参数相同会采用后者参数
     channel: 'singer',
     page: 'list',
     key: 'all_all_all',

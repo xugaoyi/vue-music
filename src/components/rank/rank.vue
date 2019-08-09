@@ -1,26 +1,62 @@
 <template>
   <div class="rank" ref="rank">
-    <div class="toplist" ref="toplist">
+    <scroll :data="topList" class="toplist" ref="toplist"> <!-- :data="topList" 传数据进去是为了让scroll组件在获取到数据后重新刷新-->
       <ul>
-        <li class="item" >
+        <li class="item" v-for="(item,index) in topList" :key="index">
           <div class="icon">
-            <img width="100" height="100"/>
+            <img width="100" height="100" v-lazy="item.picUrl" /> <!-- v-lazy 懒加载 -->
           </div>
           <ul class="songlist">
-            <li class="song">
-              <span></span>
-              <span></span>
+            <li class="song" v-for="(song,inx) in item.songList" :key="inx">
+              <span>{{inx + 1}}</span>
+              <span>{{song.songname}}-{{song.singername}}</span>
             </li>
           </ul>
         </li>
       </ul>
-    </div>
+      <div class="loading-container" v-show="!topList.length">
+        <loading></loading>
+      </div>
+    </scroll>
     <router-view></router-view>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import { getTopList } from '@/api/rank'
+import { ERR_OK } from '@/api/config'
+import Scroll from '@/base/scroll/scroll'
+import Loading from '@/base/loading/loading'
+import { playlistMixin } from '@/common/js/mixin' // 处理小播放器遮挡列表问题
+
 export default {
+  mixins: [playlistMixin], // mixins 为vue的api
+  created() {
+    this._getTopList()
+  },
+  data() {
+    return {
+      topList: []
+    }
+  },
+  methods: {
+    handlePlaylist(playlist) {
+      const bottom = playlist.length ? '60px' : ''
+      this.$refs.rank.style.bottom = bottom
+      this.$refs.toplist.refresh()
+    },
+    _getTopList() {
+      getTopList().then((res) => {
+        if (res.code === ERR_OK) {
+          this.topList = res.data.topList
+        }
+      })
+    }
+  },
+  components: {
+    Scroll,
+    Loading
+  }
 }
 </script>
 
