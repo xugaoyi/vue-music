@@ -25,6 +25,10 @@ export default {
     listenScroll: {
       type: Boolean,
       default: false
+    },
+    pullup: { // 上拉加载
+      type: Boolean,
+      default: false
     }
   },
   mounted() {
@@ -33,7 +37,7 @@ export default {
     }, 20)
   },
   methods: {
-    _initScroll() {
+    _initScroll() { // 初始化scroll
       if (!this.$refs.wrapper) {
         return
       }
@@ -45,6 +49,13 @@ export default {
         let me = this
         this.scroll.on('scroll', (pos) => {
           me.$emit('scroll', pos)
+        })
+      }
+      if (this.pullup) { // // 上拉加载
+        this.scroll.on('scrollEnd', () => { // scrollEnd 手指滑动结束
+          if (this.scroll.y <= (this.scroll.maxScrollY + 50)) { // 快到底部时
+            this.$emit('scrollToEnd')
+          }
         })
       }
     },
