@@ -8,6 +8,8 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { debounce } from '@/common/js/util'
+
 export default {
   props: {
     placeholder: {
@@ -26,12 +28,20 @@ export default {
     },
     setQuery(query) {
       this.query = query
+    },
+    blur() {
+      this.$refs.query.blur()
     }
   },
   created() {
-    this.$watch('query', (newQuery) => { // 监控query变化派发事件给父组件， 为什么不直接在watch里面写？？？
+    /**
+     * 监控query变化派发事件给父组件
+     * 为什么不直接在watch里面写？？？
+     * 因为要做节流处理，防止在快速输入时多次请求接口
+     */
+    this.$watch('query', debounce((newQuery) => {
       this.$emit('query', newQuery)
-    })
+    }, 200))
   }
 }
 </script>

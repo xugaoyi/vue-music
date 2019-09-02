@@ -1,6 +1,7 @@
 import * as types from './mutation-types'
 import { playMode } from '@/common/js/config'
 import { shuffle } from '@/common/js/util'
+import { saveSearch } from '@/common/js/cache'
 
 // 查找歌曲是否已在列表中存在，如存在则返回index
 function findIndex(list, song) {
@@ -70,4 +71,9 @@ export const insertSong = function ({commit, state}, song) {
   commit(types.SET_CURRENT_INDEX, currentIndex)
   commit(types.SET_FULL_SCREEN, true) // set打开大播放器
   commit(types.SET_PLAYING_STATE, true) // set开始播放
+}
+
+// 保存搜索历史到本地存储同时更新到vuex
+export const saveSearchHistory = function ({commit}, query) {
+  commit(types.SET_SEARCH_HISTORY, saveSearch(query))
 }

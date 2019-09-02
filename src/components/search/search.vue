@@ -21,7 +21,7 @@
 
     <!-- 搜索结果 -->
     <div class="search-result" v-show="query">
-      <suggest :query="query"></suggest>
+      <suggest @select="saveSearch" @listScroll="blurInput" :query="query"></suggest>
     </div>
 
     <!-- 歌手详情 -->
@@ -34,6 +34,7 @@ import SearchBox from '@/base/search-box/search-box'
 import { getHotKey } from '@/api/search'
 import { ERR_OK } from '@/api/config'
 import Suggest from '@/components/suggest/suggest'
+import { mapActions } from 'vuex'
 
 export default {
   created() {
@@ -52,13 +53,22 @@ export default {
     onQueryChange(query) { // 接收搜索框组件派发的事件和传入的值
       this.query = query
     },
+    blurInput() { // 当滚动搜索结果列表时 让输入框失去焦点，移动端中使键盘关闭
+      this.$refs.searchBox.blur() // 调用子组件方法
+    },
+    saveSearch() { // 点击搜索结果时保存到本地存储和vuex
+      this.saveSearchHistory(this.query)
+    },
     _getHotKey() { // 获取热门搜索关键字
       getHotKey().then((res) => {
         if (res.code === ERR_OK) {
           this.hotKey = res.data.hotkey.slice(0, 10)
         }
       })
-    }
+    },
+    ...mapActions([
+      'saveSearchHistory'
+    ])
   },
   components: {
     SearchBox,

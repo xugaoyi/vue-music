@@ -15,6 +15,8 @@ const state = {
   currentIndex: -1, // 当前播放歌曲索引
 
   disc: {}, // 歌单详情页内单个歌手数据
-  topList: {} // 排行详情页当前点击的单个榜单数据，通过此数据获取歌曲列表数据
+  topList: {}, // 排行详情页当前点击的单个榜单数据，通过此数据获取歌曲列表数据
+
+  searchHistory: [] // 搜索历史列表
 }
 export default state

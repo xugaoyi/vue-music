@@ -12,3 +12,16 @@ export function shuffle(arr) { // 随机打乱数组
   }
   return _arr
 }
+
+// 节流函数
+export function debounce(func, delay) { // func 函数 delay间隔时间
+  let timer
+  return function (...args) {
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      func.apply(this, args)
+    }, delay)
+  }
+}

@@ -4,10 +4,12 @@
           class="suggest"
           :data="result"
           :pullup="pullup"
+          :beforeScroll="beforeScroll"
           @scrollToEnd="searchMore"
+          @beforeScroll="listScroll"
   >
     <ul class="suggest-list">
-      <li  class="suggest-item" v-for="item in result" :key="item.id" @click="selectItem(item)">
+      <li @click="selectItem(item)" class="suggest-item" v-for="(item,index) in result" :key="index">
         <div class="icon">
           <i :class="getIconCls(item)"></i>
         </div>
@@ -17,8 +19,8 @@
       </li>
       <loading v-show="hasMore" title=""></loading>
     </ul>
-    <div class="no-result-wrapper">
-      <!-- <no-result title="抱歉，暂无搜索结果"></no-result> -->
+    <div v-show="!hasMore && !result.length" class="no-result-wrapper">
+      <no-result title="抱歉，暂无搜索结果"></no-result>
     </div>
   </scroll>
 </template>
@@ -27,6 +29,7 @@
 import Scroll from '@/base/scroll/scroll'
 import Loading from '@/base/loading/loading'
 import Singer from '@/common/js/singer'
+import NoResult from '@/base/no-result/no-result'
 import { search } from '@/api/search'
 import { ERR_OK } from '@/api/config'
 import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
@@ -37,24 +40,28 @@ const perpage = 20 // 每页查询多少条数据
 
 export default {
   props: {
-    query: {
-      type: String,
-      default: ''
-    },
     showSinger: {
       type: Boolean,
       default: true
+    },
+    query: {
+      type: String,
+      default: ''
     }
   },
   data() {
     return {
       page: 1,
       result: [],
+      beforeScroll: true, // 传入给scroll的属性，打开滚动前处理事件
       pullup: true, // 上拉加载
       hasMore: true // 是否已加载完
     }
   },
   methods: {
+    refresh() {
+      this.$refs.suggest.refresh()
+    },
     search() { // 执行搜索
       // 恢复初始值
       this.page = 1
@@ -62,7 +69,9 @@ export default {
       this.$refs.suggest.scrollTo(0, 0)
       search(this.query, this.page, this.showSinger, perpage).then((res) => { // 调用搜索接口 参数：1搜索关键字  2请求第几页 3是否显示歌手
         if (res.code === ERR_OK) {
-          this.result = this._genResult(res.data)
+          this._genResult(res.data).then((result) => {
+            this.result = result
+          })
           this._checkMore(res.data) // 检查是否还有更多数据
         }
       })
@@ -74,7 +83,10 @@ export default {
       this.page++
       search(this.query, this.page, this.showSinger, perpage).then((res) => { // 调用搜索接口 参数：1搜索关键字  2请求第几页 3是否显示歌手
         if (res.code === ERR_OK) {
-          this.result = this.result.concat(this._genResult(res.data))
+          // this.result = this.result.concat(this._genResult(res.data))
+          this._genResult(res.data).then((result) => {
+            this.result = this.result.concat(result)
+          })
           this._checkMore(res.data) // 检查是否还有更多数据
         }
       })
@@ -106,10 +118,14 @@ export default {
       } else { // 进入歌曲
         this.insertSong(item)
       }
+      this.$emit('select') // 点击搜索结果外部的操作有：保存到本地存储和vuex
+    },
+    listScroll () { // 滚动结果列表时
+      this.$emit('listScroll')
     },
     _checkMore(data) { // 检查是否还有更多数据
       const song = data.song
-      if (!song.list.length || (song.curnum + song.curpage * perpage) >= song.totalnum) {
+      if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
         this.hasMore = false
       }
     },
@@ -138,13 +154,17 @@ export default {
     ...mapActions(['insertSong'])
   },
   watch: {
-    query() {
-      this.search() // 执行搜索
+    query(newQuery) {
+      if (!newQuery) {
+        return
+      }
+      this.search(newQuery) // 执行搜索
     }
   },
   components: {
     Scroll,
-    Loading
+    Loading,
+    NoResult
   }
 }
 </script>

@@ -2,7 +2,7 @@
 
 > 音乐播放器
 
-[思维导图](http://naotu.baidu.com/file/0b24b39f41a012a5d06327a17ac50f6e?token=88d0c12910dbb883)
+[代码结构思维导图](http://naotu.baidu.com/file/0b24b39f41a012a5d06327a17ac50f6e?token=88d0c12910dbb883)
 
 ## Build Setup
 

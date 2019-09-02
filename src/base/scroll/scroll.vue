@@ -29,6 +29,10 @@ export default {
     pullup: { // 上拉加载
       type: Boolean,
       default: false
+    },
+    beforeScroll: { // 滚动前的处理函数
+      type: Boolean,
+      default: false
     }
   },
   mounted() {
@@ -51,11 +55,16 @@ export default {
           me.$emit('scroll', pos)
         })
       }
-      if (this.pullup) { // // 上拉加载
+      if (this.pullup) { // 上拉加载
         this.scroll.on('scrollEnd', () => { // scrollEnd 手指滑动结束
           if (this.scroll.y <= (this.scroll.maxScrollY + 50)) { // 快到底部时
             this.$emit('scrollToEnd')
           }
+        })
+      }
+      if (this.beforeScroll) { // 滚动前的处理函数
+        this.scroll.on('beforeScrollStart', () => {
+          this.$emit('beforeScroll')
         })
       }
     },
