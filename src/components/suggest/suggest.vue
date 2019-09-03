@@ -59,7 +59,7 @@ export default {
     }
   },
   methods: {
-    refresh() {
+    refresh() { // 刷新scroll
       this.$refs.suggest.refresh()
     },
     search() { // 执行搜索

@@ -110,12 +110,16 @@
             <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i> <!-- .stop 阻止冒泡事件 防止触发父级的open事件 -->
           </progress-circle>
         </div>
-        <div class="control">
+        <div class="control" @click="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
     <!-- 迷你播放器 e-->
+
+    <!-- 播放列表页 s -->
+    <playlist ref="playlist"></playlist>
+    <!-- 播放列表页 s -->
 
     <!-- html5播放音频 s-->
     <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
@@ -133,6 +137,7 @@ import { playMode } from '@/common/js/config' // 播放模式语义化配置
 import { shuffle } from '@/common/js/util' // 随机打乱数组方法
 import Lyric from 'lyric-parser' // 歌词解析器
 import Scroll from '@/base/scroll/scroll' // 滚动组件
+import Playlist from '@/components/playlist/playlist' // 播放列表页
 
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
@@ -349,6 +354,9 @@ export default {
       }
       this.playingLyric = txt
     },
+    showPlaylist() { // 打开播放列表组件
+      this.$refs.playlist.show()
+    },
     // 以下三个Touch为切换cd与歌词卡片的操作
     middleTouchStart(e) {
       this.touch.initiated = true
@@ -460,7 +468,8 @@ export default {
   components: {
     ProgressBar,
     ProgressCircle,
-    Scroll
+    Scroll,
+    Playlist
   }
 }
 </script>

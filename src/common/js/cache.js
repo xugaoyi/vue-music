@@ -6,8 +6,13 @@ const SEARCH_KEY = '__search__'
 const SEARCH_MAX_LENGTH = 15
 
 // insertArray 插入数据到数组
-function insertArray(arr, val, compare, maxLen) { // compare 比较函数
-  const index = arr.findIndex(compare) // arr中是否已存在compare 且返回索引值
+function insertArray(arr, val, compare, maxLen) { // compare函数
+  const index = arr.findIndex(compare) // arr中是否已存在query 且返回索引值
+  // compare，把函数当参数传入，相当于
+  // const index = arr.findIndex((item) => {
+  //   return item === query
+  // })
+
   if (index === 0) { // 存在第一条位置，直接返回
     return
   }
@@ -22,7 +27,15 @@ function insertArray(arr, val, compare, maxLen) { // compare 比较函数
   }
 }
 
-// 点击搜索结果时保存记录到本地存储
+// 删除操作
+function deleteFromArray(arr, compare) {
+  const index = arr.findIndex(compare)
+  if (index > -1) {
+    arr.splice(index, 1)
+  }
+}
+
+// 点击搜索结果时保存历史记录到本地存储
 export function saveSearch(query) {
   let searches = storage.get(SEARCH_KEY, []) // 获取本地localstorage中的SEARCH_KEY，没有则返回[] (good-storage的语法)
   insertArray(searches, query, (item) => {
@@ -30,4 +43,25 @@ export function saveSearch(query) {
   }, SEARCH_MAX_LENGTH)
   storage.set(SEARCH_KEY, searches)
   return searches
+}
+
+// 获取本地存储数据-搜索历史
+export function loadSearch() {
+  return storage.get(SEARCH_KEY, [])
+}
+
+// 删除搜索历史
+export function deleteSearch(query) {
+  let searches = storage.get(SEARCH_KEY, [])
+  deleteFromArray(searches, (item) => {
+    return item === query
+  })
+  storage.set(SEARCH_KEY, searches)
+  return searches
+}
+
+// 清空搜索历史
+export function clearSearch() {
+  storage.remove(SEARCH_KEY)
+  return []
 }
