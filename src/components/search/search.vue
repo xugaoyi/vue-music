@@ -37,7 +37,7 @@
     </div>
 
     <!-- 弹窗 -->
-    <confirm ref="confirm" text="确定清空所有搜索历史？" confirmBtnText="清空" @confirm="clearSearchHistory"></confirm>
+    <confirm ref="confirm" text="是否清空所有搜索历史？" confirmBtnText="清空" @confirm="clearSearchHistory"></confirm>
     <!-- 歌手详情 -->
     <router-view></router-view>
   </div>

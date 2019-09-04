@@ -85,3 +85,35 @@ export const deleteSearchHistory = function ({commit}, query) {
 export const clearSearchHistory = function ({commit}) {
   commit(types.SET_SEARCH_HISTORY, clearSearch())
 }
+
+// 删除播放列表中的某一首歌曲
+export const deleteSong = function ({commit, state}, song) {
+  let playlist = state.playlist.slice() // 播放列表 副本
+  let sequenceList = state.sequenceList.slice() // 顺序列表 副本
+  let currentIndex = state.currentIndex // 当前播放索引
+
+  let pIndex = findIndex(playlist, song)
+  playlist.splice(pIndex, 1) // 删除播放列表中选择中的歌曲
+
+  let sIndex = findIndex(sequenceList, song)
+  sequenceList.splice(sIndex, 1)
+
+  if (currentIndex > pIndex || currentIndex === playlist.length) { // 当前播放索引在要删除歌曲之后 或 当前播放歌曲是最后一首歌
+    currentIndex--
+  }
+
+  commit(types.SET_PLAYLIST, playlist)
+  commit(types.SET_SEQUENCE_LIST, sequenceList)
+  commit(types.SET_CURRENT_INDEX, currentIndex)
+
+  const playlistState = playlist.length > 0
+  commit(types.SET_PLAYING_STATE, playlistState) // 如果已删完播放列表 则改变播放状态为false, 否则为true
+}
+
+// 清空播放列表
+export const deleteSongList = function ({commit}) {
+  commit(types.SET_PLAYLIST, [])
+  commit(types.SET_SEQUENCE_LIST, [])
+  commit(types.SET_CURRENT_INDEX, -1)
+  commit(types.SET_PLAYING_STATE, false)
+}

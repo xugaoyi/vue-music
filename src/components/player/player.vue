@@ -110,7 +110,7 @@
             <i @click.stop="togglePlaying" class="icon-mini" :class="miniIcon"></i> <!-- .stop 阻止冒泡事件 防止触发父级的open事件 -->
           </progress-circle>
         </div>
-        <div class="control" @click="showPlaylist">
+        <div class="control" @click.stop="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
@@ -447,6 +447,9 @@ export default {
   },
   watch: {
     currentSong(newSong, oldSong) { // watch里面的方法 参数1 为新的值，参数2 为原本的值
+      if (!newSong.id) {
+        return
+      }
       if (newSong.id === oldSong.id) { // 防止切换播放模式时自动播放歌曲
         return
       }

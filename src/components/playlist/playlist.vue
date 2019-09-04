@@ -6,23 +6,23 @@
           <h1 class="title">
             <i class="icon"></i>
             <span class="text"></span>
-            <span class="clear"><i class="icon-clear"></i></span>
+            <span class="clear" @click="showConfirm"><i class="icon-clear"></i></span>
           </h1>
         </div>
-        <div ref="listContent" class="list-content">
-          <ul name="list">
-            <li ref="listItem" class="item" v-for="(item,index) in sequenceList" :key="index">
-              <i class="current"></i>
+        <scroll :data="sequenceList" ref="listContent" class="list-content">
+          <transition-group name="list" tag="ul">
+            <li ref="listItem" class="item" v-for="(item,index) in sequenceList" :key="item.id" @click="selectItem(item,index)">
+              <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
               <span class="like">
                 <i></i>
               </span>
-              <span class="delete">
+              <span class="delete" @click.stop="deleteOne(item)">
                 <i class="icon-delete"></i>
               </span>
             </li>
-          </ul>
-        </div>
+          </transition-group>
+        </scroll>
         <div class="list-operate">
           <div class="add">
             <i class="icon-add"></i>
@@ -33,14 +33,18 @@
           <span>关闭</span>
         </div>
       </div>
-      <!-- <confirm ref="confirm" @confirm="confirmClear" text="是否清空播放列表" confirmBtnText="清空"></confirm>
-      <add-song ref="addSong"></add-song> -->
+      <confirm ref="confirm" @confirm="confirmClear" text="是否清空播放列表" confirmBtnText="清空"></confirm>
+      <!-- <add-song ref="addSong"></add-song> -->
     </div>
   </transition>
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { playMode } from '@/common/js/config' // 播放模式
+import Scroll from '@/base/scroll/scroll'
+import Confirm from '@/base/confirm/confirm'
+
 export default {
   data() {
     return {
@@ -48,17 +52,76 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'sequenceList'
+    ...mapGetters([ // 这里相当于把获取到的数据存放到data
+      'sequenceList',
+      'currentSong',
+      'playlist',
+      'mode'
     ])
   },
   methods: {
     show() {
       this.showFlag = true
+      setTimeout(() => { // 需在显示列表时刷新才能时scroll组件滚动
+        this.$refs.listContent.refresh()
+        this.scrollToCurrent(this.currentSong)
+      }, 20)
     },
     hide() {
       this.showFlag = false
+    },
+    getCurrentIcon(item) { // 添加当前播放歌曲图标
+      if (this.currentSong.id === item.id) {
+        return 'icon-play'
+      }
+      return ''
+    },
+    selectItem(item, index) { // 选中歌曲
+      console.log(this.mode)
+      if (this.mode === playMode.random) { // 随机播放模式 (因为随机播放时的播放列表是打乱的，索引在获取索引是需要findIndex)
+        index = this.playlist.findIndex((song) => { // 找到当前点击歌曲在播放列表中的索引，赋值给currentIndex
+          return song.id === item.id
+        })
+      }
+      this.setCurrentIndex(index)
+      this.setPlayingState(true)
+    },
+    scrollToCurrent(current) { // 滚动到当前播放歌曲
+      const index = this.sequenceList.findIndex((song) => { // 找到当前播放歌曲在顺序列表中的索引（播放列表不管什么播放模式都是顺序列表展示）
+        return current.id === song.id
+      })
+      this.$refs.listContent.scrollToElement(this.$refs.listItem[index], 300) // 滚动到相应位置 300毫秒
+    },
+    deleteOne(item) {
+      this.deleteSong(item)
+      if (!this.playlist.length) { // 当已删除完
+        this.hide()
+      }
+    },
+    showConfirm() { // 是否清空询问框
+      this.$refs.confirm.show()
+    },
+    confirmClear() { // 清空
+      this.deleteSongList()
+      this.hide()
+    },
+    ...mapMutations({
+      setCurrentIndex: 'SET_CURRENT_INDEX',
+      setPlayingState: 'SET_PLAYING_STATE' // 播放状态
+    }),
+    ...mapActions(['deleteSong', 'deleteSongList'])
+  },
+  watch: {
+    currentSong(newSong, oldSong) { // 当切换歌曲时 滚动到相应位置
+      if (!this.showFlag || newSong.id === oldSong.id) {
+        return
+      }
+      this.scrollToCurrent(newSong)
     }
+  },
+  components: {
+    Scroll,
+    Confirm
   }
 }
 </script>
