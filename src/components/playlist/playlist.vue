@@ -4,12 +4,12 @@
       <div class="list-wrapper" @click.stop>
         <div class="list-header">
           <h1 class="title">
-            <i class="icon"></i>
-            <span class="text"></span>
+            <i class="icon" :class="iconMode" @click="changeMode"></i>
+            <span class="text"  @click="changeMode">{{modeText}}</span>
             <span class="clear" @click="showConfirm"><i class="icon-clear"></i></span>
           </h1>
         </div>
-        <scroll :data="sequenceList" ref="listContent" class="list-content">
+        <scroll :data="sequenceList" :refreshDelay="refreshDelay" ref="listContent" class="list-content">
           <transition-group name="list" tag="ul">
             <li ref="listItem" class="item" v-for="(item,index) in sequenceList" :key="item.id" @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
@@ -24,7 +24,7 @@
           </transition-group>
         </scroll>
         <div class="list-operate">
-          <div class="add">
+          <div class="add" @click="addSong">
             <i class="icon-add"></i>
             <span class="text">添加歌曲到队列</span>
           </div>
@@ -33,31 +33,39 @@
           <span>关闭</span>
         </div>
       </div>
-      <confirm ref="confirm" @confirm="confirmClear" text="是否清空播放列表" confirmBtnText="清空"></confirm>
-      <!-- <add-song ref="addSong"></add-song> -->
+      <confirm ref="confirm" @confirm="confirmClear" text="是否清空播放列表？" confirmBtnText="清空"></confirm>
+      <add-song ref="addSong"></add-song>
     </div>
   </transition>
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapMutations, mapActions } from 'vuex'
+// import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 import { playMode } from '@/common/js/config' // 播放模式
 import Scroll from '@/base/scroll/scroll'
 import Confirm from '@/base/confirm/confirm'
+import { playerMixin } from '@/common/js/mixin' // 共享代码的引入
+import AddSong from '@/components/add-song/add-song'
 
 export default {
+  mixins: [playerMixin],
   data() {
     return {
-      showFlag: false
+      showFlag: false,
+      refreshDelay: 100
     }
   },
   computed: {
-    ...mapGetters([ // 这里相当于把获取到的数据存放到data
-      'sequenceList',
-      'currentSong',
-      'playlist',
-      'mode'
-    ])
+    modeText() {
+      return this.mode === playMode.sequence ? '顺序播放' : this.mode === playMode.random ? '随机播放' : '单曲循环'
+    }
+    // ...mapGetters([ // 这里相当于把获取到的数据存放到data
+    //   'sequenceList',
+    //   'currentSong',
+    //   'playlist',
+    //   'mode'
+    // ])
   },
   methods: {
     show() {
@@ -77,7 +85,6 @@ export default {
       return ''
     },
     selectItem(item, index) { // 选中歌曲
-      console.log(this.mode)
       if (this.mode === playMode.random) { // 随机播放模式 (因为随机播放时的播放列表是打乱的，索引在获取索引是需要findIndex)
         index = this.playlist.findIndex((song) => { // 找到当前点击歌曲在播放列表中的索引，赋值给currentIndex
           return song.id === item.id
@@ -105,10 +112,13 @@ export default {
       this.deleteSongList()
       this.hide()
     },
-    ...mapMutations({
-      setCurrentIndex: 'SET_CURRENT_INDEX',
-      setPlayingState: 'SET_PLAYING_STATE' // 播放状态
-    }),
+    addSong() { // 添加歌曲
+      this.$refs.addSong.show()
+    },
+    // ...mapMutations({
+    //   setCurrentIndex: 'SET_CURRENT_INDEX',
+    //   setPlayingState: 'SET_PLAYING_STATE' // 播放状态
+    // }),
     ...mapActions(['deleteSong', 'deleteSongList'])
   },
   watch: {
@@ -121,7 +131,8 @@ export default {
   },
   components: {
     Scroll,
-    Confirm
+    Confirm,
+    AddSong
   }
 }
 </script>

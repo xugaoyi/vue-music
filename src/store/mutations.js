@@ -9,10 +9,9 @@ const mutations = {
    * @param {*} state 为state.js中的state对象
    * @param {*} 第二个参数是要传过去的
    */
-  [types.SET_SINGER](state, singer) { // 在singer.vue调用
+  [types.SET_SINGER](state, singer) { // 相当于 SET_SINGER(){}
     state.singer = singer
   },
-
   [types.SET_PLAYING_STATE](state, flay) {
     state.playing = flay
   },
@@ -31,17 +30,17 @@ const mutations = {
   [types.SET_CURRENT_INDEX](state, index) {
     state.currentIndex = index
   },
-
   [types.SET_DISC](state, disc) {
     state.disc = disc
   },
-
   [types.SET_TOP_LIST](state, topList) {
     state.topList = topList
   },
-
   [types.SET_SEARCH_HISTORY](state, history) {
     state.searchHistory = history
+  },
+  [types.SET_PLAY_HISTORY](state, history) {
+    state.playHistory = history
   }
 }
 export default mutations

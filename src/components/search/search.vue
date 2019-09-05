@@ -7,7 +7,7 @@
 
     <!-- 热门搜索 -->
     <div class="shortcut-wrapper" ref="shortcutWrapper" v-show="!query">
-      <scroll class="shortcut" ref="shortcut" :data="shortcut">
+      <scroll class="shortcut" ref="shortcut" :data="shortcut" :refreshDelay="refreshDelay">
         <div>
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>
@@ -51,27 +51,28 @@ import Confirm from '@/base/confirm/confirm'
 import Scroll from '@/base/scroll/scroll'
 import { getHotKey } from '@/api/search'
 import { ERR_OK } from '@/api/config'
-import { mapActions, mapGetters } from 'vuex'
-import { playlistMixin } from '@/common/js/mixin' // 小播放器不遮挡列表处理
+// import { mapActions, mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
+import { playlistMixin, searchMixin } from '@/common/js/mixin' // 共享代码
 
 export default {
-  mixins: [playlistMixin],
+  mixins: [playlistMixin, searchMixin],
   created() {
     this._getHotKey()
   },
   data() {
     return {
-      hotKey: [],
-      query: ''
+      // query: '',
+      hotKey: []
     }
   },
   computed: {
     shortcut() {
       return this.hotKey.concat(this.searchHistory) // hotKey和searchHistory其中之一有变化时都会重新计算，随后会更新scroll的高度
-    },
-    ...mapGetters([
-      'searchHistory'
-    ])
+    }
+    // ...mapGetters([
+    //   'searchHistory'
+    // ])
   },
   methods: {
     handlePlaylist(playlist) { // 小播放器不遮挡列表处理
@@ -81,18 +82,19 @@ export default {
       this.$refs.searchResult.style.bottom = bottom
       this.$refs.suggest.refresh()
     },
-    addQuery(query) {
-      this.$refs.searchBox.setQuery(query) // 调用子组件方法并传入值
-    },
-    onQueryChange(query) { // 接收搜索框组件派发的事件和传入的值
-      this.query = query
-    },
-    blurInput() { // 当滚动搜索结果列表时 让输入框失去焦点，移动端中使键盘关闭
-      this.$refs.searchBox.blur() // 调用子组件方法
-    },
-    saveSearch() { // 点击搜索结果时保存到本地存储和vuex
-      this.saveSearchHistory(this.query)
-    },
+    // addQuery(query) {
+    //   this.$refs.searchBox.setQuery(query) // 调用子组件方法并传入值
+    // },
+    // onQueryChange(query) { // 接收搜索框组件派发的事件和传入的值
+    //   this.query = query
+    // },
+    // blurInput() { // 当滚动搜索结果列表时 让输入框失去焦点，移动端中使键盘关闭
+    //   this.$refs.searchBox.blur() // 调用子组件方法
+    // },
+    // saveSearch() { // 点击搜索结果时保存到本地存储和vuex
+    //   this.saveSearchHistory(this.query)
+    // },
+
     // 仅是直接调用mapActions方法的，可以直接在DOM标签上调用，mapActions相当于在methods上绑定了方法
     // deleteOne(item) { // 删除一条历史
     //   this.deleteSearchHistory(item)
@@ -108,8 +110,8 @@ export default {
       })
     },
     ...mapActions([
-      'saveSearchHistory',
-      'deleteSearchHistory',
+      // 'saveSearchHistory',
+      // 'deleteSearchHistory',
       'clearSearchHistory'
     ])
   },

@@ -18,3 +18,5 @@ export const disc = state => state.disc // 歌单详情页单个歌手数据
 export const topList = state => state.topList // 排行详情页 排行榜数据
 
 export const searchHistory = state => state.searchHistory // 搜索历史列表
+
+export const playHistory = state => state.playHistory // 播放历史列表

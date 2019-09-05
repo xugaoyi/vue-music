@@ -128,21 +128,23 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapMutations } from 'vuex' // 获取/设置vuex的数据 语法糖
+import { mapGetters, mapMutations, mapActions } from 'vuex' // 获取/设置vuex的数据 语法糖
 import animations from 'create-keyframe-animation' // 动画库依赖https://github.com/HenrikJoreteg/create-keyframe-animation
 import { prefixStyle } from '@/common/js/dom' // js操作css3样式前缀的封装
 import ProgressBar from '@/base/progress-bar/progress-bar' // 进度条组件
 import ProgressCircle from '@/base/progress-Circle/progress-Circle' // 圆形进度条组件
 import { playMode } from '@/common/js/config' // 播放模式语义化配置
-import { shuffle } from '@/common/js/util' // 随机打乱数组方法
+// import { shuffle } from '@/common/js/util' // 随机打乱数组方法
 import Lyric from 'lyric-parser' // 歌词解析器
 import Scroll from '@/base/scroll/scroll' // 滚动组件
 import Playlist from '@/components/playlist/playlist' // 播放列表页
+import { playerMixin } from '@/common/js/mixin' // 共享代码的引入
 
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
 
 export default {
+  mixins: [playerMixin],
   data() {
     return {
       songReady: false,
@@ -158,9 +160,9 @@ export default {
     cdCls() {
       return this.playing ? 'play' : 'play pause'
     },
-    iconMode() {
-      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
-    },
+    // iconMode() {
+    //   return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+    // },
     playIcon() {
       return this.playing ? 'icon-pause' : 'icon-play'
     },
@@ -174,13 +176,13 @@ export default {
       return this.currentTime / this.currentSong.duration
     },
     ...mapGetters([ // 获取vuex数据
+      // 'playlist', // 歌曲播放列表（随播放模式改变）
+      // 'currentSong', // 当前播放歌曲数据
+      // 'mode', // 播放模式
+      // 'sequenceList', // 歌曲原始列表
       'fullScreen', // 播放器展开收起(大播放与小播放器)
-      'playlist', // 歌曲播放列表（随播放模式改变）
-      'currentSong', // 当前播放歌曲数据
       'playing', // 是否播放
-      'currentIndex', // 当前播放索引
-      'mode', // 播放模式
-      'sequenceList' // 歌曲原始列表
+      'currentIndex' // 当前播放索引
     ])
   },
   created() {
@@ -291,6 +293,7 @@ export default {
     },
     ready() { // 当音频已准备好时
       this.songReady = true // 防止快速点击时报错
+      this.savePlayHistory(this.currentSong) // 保存到播放历史
     },
     error() { // 音频加载出错时
       this.songReady = true
@@ -314,24 +317,24 @@ export default {
         this.currentLyric.seek(currentTime * 1000) // 歌词高亮滚动与歌曲进度同步
       }
     },
-    changeMode() { // 切换播放模式
-      const mode = (this.mode + 1) % 3
-      this.setPlayMode(mode)
-      let list = null
-      if (mode === playMode.random) { // 随机
-        list = shuffle(this.sequenceList)
-      } else { // 顺序播放 与 单曲播放 （单曲播放不在这里判断，单曲播放由歌曲播放结束时重新播放本歌曲）
-        list = this.sequenceList
-      }
-      this.resetCurrentIndex(list) // 防止因为改变模式而改变当前播放的歌曲
-      this.setPlaylist(list)
-    },
-    resetCurrentIndex(list) { // 调整当前播放索引
-      let index = list.findIndex((item) => { // 获取当前歌曲的索引
-        return item.id === this.currentSong.id
-      })
-      this.setCurrentIndex(index)
-    },
+    // changeMode() { // 切换播放模式
+    //   const mode = (this.mode + 1) % 3
+    //   this.setPlayMode(mode)
+    //   let list = null
+    //   if (mode === playMode.random) { // 随机
+    //     list = shuffle(this.sequenceList)
+    //   } else { // 顺序播放 与 单曲播放 （单曲播放不在这里判断，单曲播放由歌曲播放结束时重新播放本歌曲）
+    //     list = this.sequenceList
+    //   }
+    //   this.resetCurrentIndex(list) // 防止因为改变模式而改变当前播放的歌曲
+    //   this.setPlaylist(list)
+    // },
+    // resetCurrentIndex(list) { // 调整当前播放索引
+    //   let index = list.findIndex((item) => { // 获取当前歌曲的索引
+    //     return item.id === this.currentSong.id
+    //   })
+    //   this.setCurrentIndex(index)
+    // },
     getLyric() { // 获取并解析歌词
       this.currentSong.getLyric().then((lyric) => {
         this.currentLyric = new Lyric(lyric, this.handleLyric) // API详见https://github.com/ustbhuangyi/lyric-parser
@@ -438,12 +441,15 @@ export default {
       return {x, y, scale}
     },
     ...mapMutations({ // 映射 提交mutations
-      setFullScreen: 'SET_FULL_SCREEN',
-      setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX',
-      setPlayMode: 'SET_PLAY_MODE',
-      setPlaylist: 'SET_PLAYLIST'
-    })
+      setFullScreen: 'SET_FULL_SCREEN'
+      // setPlayingState: 'SET_PLAYING_STATE',
+      // setCurrentIndex: 'SET_CURRENT_INDEX',
+      // setPlayMode: 'SET_PLAY_MODE',
+      // setPlaylist: 'SET_PLAYLIST'
+    }),
+    ...mapActions([
+      'savePlayHistory'
+    ])
   },
   watch: {
     currentSong(newSong, oldSong) { // watch里面的方法 参数1 为新的值，参数2 为原本的值
