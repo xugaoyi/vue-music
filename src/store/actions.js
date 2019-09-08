@@ -1,7 +1,7 @@
 import * as types from './mutation-types'
 import { playMode } from '@/common/js/config'
 import { shuffle } from '@/common/js/util'
-import { saveSearch, deleteSearch, clearSearch, savePlay } from '@/common/js/cache'
+import { saveSearch, deleteSearch, clearSearch, savePlay, saveFavorite, deleteFavorite } from '@/common/js/cache'
 
 // 查找歌曲是否已在列表中存在，如存在则返回index
 function findIndex(list, song) {
@@ -35,7 +35,7 @@ export const randomPlay = function ({commit}, {list}) {
   commit(types.SET_PLAYING_STATE, true) // set开始播放
 }
 
-// 从搜索页点击歌曲时
+// 插入歌曲到播放列表，（从搜索页点击歌曲、最近播放页点击歌曲）
 export const insertSong = function ({commit, state}, song) {
   let playlist = state.playlist.slice() // 播放列表 副本
   let sequenceList = state.sequenceList.slice() // 顺序列表 副本
@@ -121,4 +121,13 @@ export const deleteSongList = function ({commit}) {
 // 保存播放历史 (player内调用)
 export const savePlayHistory = function({commit}, song) {
   commit(types.SET_PLAY_HISTORY, savePlay(song)) // 存入vuex同时执行savePlay方法存入本地存储
+}
+
+// 收藏歌曲
+export const saveFavoriteList = function({commit}, song) {
+  commit(types.SET_FAVORITE_LIST, saveFavorite(song)) // 存入vuex同时存入本地存储
+}
+// 取消收藏歌曲
+export const deleteFavoriteList = function({commit}, song) {
+  commit(types.SET_FAVORITE_LIST, deleteFavorite(song)) // 存入vuex同时存入本地存储
 }

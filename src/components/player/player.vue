@@ -86,7 +86,7 @@
               <i @click="next" class="icon-next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon icon-not-favorite"></i>
+              <i class="icon" @click="toggleFavorite(currentSong)" :class="getFavoriteIcon(currentSong)"></i>
             </div>
           </div>
         </div>
@@ -122,7 +122,7 @@
     <!-- 播放列表页 s -->
 
     <!-- html5播放音频 s-->
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+    <audio ref="audio" :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
     <!-- html5播放音频 e-->
   </div>
 </template>
@@ -261,6 +261,7 @@ export default {
       }
       if (this.playlist.length === 1) {
         this.loop()
+        return
       } else {
         let index = this.currentIndex - 1
         if (index === -1) {
@@ -279,6 +280,7 @@ export default {
       }
       if (this.playlist.length === 1) {
         this.loop()
+        return
       } else {
         let index = this.currentIndex + 1
         if (index === this.playlist.length) {
@@ -337,6 +339,9 @@ export default {
     // },
     getLyric() { // 获取并解析歌词
       this.currentSong.getLyric().then((lyric) => {
+        if (this.currentSong.lyric !== lyric) { // 防止快速切换歌曲时发生歌词错乱
+          return
+        }
         this.currentLyric = new Lyric(lyric, this.handleLyric) // API详见https://github.com/ustbhuangyi/lyric-parser
         if (this.playing) {
           this.currentLyric.play()
@@ -452,7 +457,7 @@ export default {
     ])
   },
   watch: {
-    currentSong(newSong, oldSong) { // watch里面的方法 参数1 为新的值，参数2 为原本的值
+    currentSong(newSong, oldSong) { // 参数1 为新的值，参数2 为原本的值
       if (!newSong.id) {
         return
       }
@@ -461,8 +466,12 @@ export default {
       }
       if (this.currentLyric) {
         this.currentLyric.stop() // 停止歌词高亮的滚动
+        this.currentTime = 0
+        this.playingLyric = ''
+        this.currentLineNum = 0
       }
-      setTimeout(() => {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => { // 加1秒延迟是为了在手机中从后台切换到前台能顺利播放
         this.$refs.audio.play() // 播放音频
         this.getLyric() // 获取歌词
       }, 1000)

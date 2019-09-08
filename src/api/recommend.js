@@ -18,7 +18,7 @@ export function getRecommend() { // 获取轮播图数据
 
 export function getDiscList () { // 获取歌单列表
   // 线上环境地址，根据需要配置修改
-  const url = debug ? '/api/getDiscList' : 'http://ustbhuangyi.com/music/api/getDiscList'
+  const url = debug ? '/api/getDiscList' : 'http://localhost:9000/api/getDiscList'
 
   const data = Object.assign({}, commonParams, {
     platform: 'yqq',
@@ -40,7 +40,7 @@ export function getDiscList () { // 获取歌单列表
 }
 
 export function getSongList(disstid) { // 获取歌单内的歌曲列表
-  const url = debug ? '/api/getCdInfo' : 'http://ustbhuangyi.com/music/api/getCdInfo'
+  const url = debug ? '/api/getCdInfo' : 'http://localhost:9000/api/getCdInfo'
 
   const data = Object.assign({}, commonParams, {
     disstid,

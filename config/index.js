@@ -44,6 +44,8 @@ module.exports = {
   },
 
   build: {
+    port: 9000, // 端口，用于打包后的测试
+
     // Template for index.html
     index: path.resolve(__dirname, '../dist/index.html'),
 

@@ -17,7 +17,7 @@ export function getHotKey () { // 热门搜索关键字
 }
 
 export function search (query, page, zhida, perpage) { // 搜索接口 query搜索关键词  page第几页 zhida是否显示歌手 perpage每页多少条
-  const url = debug ? '/api/search' : 'http://ustbhuangyi.com/music/api/search'
+  const url = debug ? '/api/search' : 'http://localhost:9000/api/search'
 
   const data = Object.assign({}, commonParams, {
     w: query,

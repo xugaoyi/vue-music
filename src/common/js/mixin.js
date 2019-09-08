@@ -44,7 +44,8 @@ export const playerMixin = {
       'sequenceList',
       'currentSong',
       'playlist',
-      'mode'
+      'mode',
+      'favoriteList'
     ])
   },
   methods: {
@@ -66,12 +67,35 @@ export const playerMixin = {
       })
       this.setCurrentIndex(index)
     },
+    getFavoriteIcon(song) { // 收藏图标样式
+      if (this._isFavorite(song)) {
+        return 'icon-favorite'
+      }
+      return 'icon-not-favorite'
+    },
+    toggleFavorite(song) { // 点击收藏图标
+      if (this._isFavorite(song)) {
+        this.deleteFavoriteList(song)
+      } else {
+        this.saveFavoriteList(song)
+      }
+    },
+    _isFavorite(song) { // 收藏歌曲是否在列表中
+      const index = this.favoriteList.findIndex((item) => {
+        return item.id === song.id
+      })
+      return index > -1 // 大于-1 表示存在于收藏列表，否则反之
+    },
     ...mapMutations({ // 映射 提交mutations
       setPlayingState: 'SET_PLAYING_STATE',
       setCurrentIndex: 'SET_CURRENT_INDEX',
       setPlayMode: 'SET_PLAY_MODE',
       setPlaylist: 'SET_PLAYLIST'
-    })
+    }),
+    ...mapActions([
+      'saveFavoriteList',
+      'deleteFavoriteList'
+    ])
   }
 }
 
@@ -80,7 +104,7 @@ export const searchMixin = {
   data() {
     return {
       query: '',
-      refreshDelay: 100
+      refreshDelay: 120 // 延迟刷新scroll组件，处理使用transition-group后滚动位置不对的问题
     }
   },
   computed: {

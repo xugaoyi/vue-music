@@ -3,7 +3,7 @@
  */
 
 import { playMode } from '@/common/js/config'
-import { loadSearch, loadPlay } from '@/common/js/cache'
+import { loadSearch, loadPlay, loadFavorite } from '@/common/js/cache'
 
 const state = {
   singer: {}, // 歌手详情页内单个歌手数据
@@ -20,6 +20,8 @@ const state = {
 
   searchHistory: loadSearch(), // 搜索历史,从本地存储获取
 
-  playHistory: loadPlay() // 播放历史,从本地存储获取
+  playHistory: loadPlay(), // 播放历史,从本地存储获取
+
+  favoriteList: loadFavorite() // 收藏歌曲列表,从本地存储获取
 }
 export default state

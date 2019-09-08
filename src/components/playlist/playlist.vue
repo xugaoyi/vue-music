@@ -10,12 +10,12 @@
           </h1>
         </div>
         <scroll :data="sequenceList" :refreshDelay="refreshDelay" ref="listContent" class="list-content">
-          <transition-group name="list" tag="ul">
+          <transition-group ref="list" name="list" tag="ul">
             <li ref="listItem" class="item" v-for="(item,index) in sequenceList" :key="item.id" @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
-              <span class="like">
-                <i></i>
+              <span class="like" @click.stop="toggleFavorite(item)">
+                <i :class="getFavoriteIcon(item)"></i>
               </span>
               <span class="delete" @click.stop="deleteOne(item)">
                 <i class="icon-delete"></i>
@@ -53,7 +53,7 @@ export default {
   data() {
     return {
       showFlag: false,
-      refreshDelay: 100
+      refreshDelay: 120 // 延迟刷新scroll组件，处理使用transition-group后滚动位置不对的问题
     }
   },
   computed: {
@@ -70,7 +70,7 @@ export default {
   methods: {
     show() {
       this.showFlag = true
-      setTimeout(() => { // 需在显示列表时刷新才能时scroll组件滚动
+      setTimeout(() => { // 需在显示列表时刷新才能使scroll组件滚动
         this.$refs.listContent.refresh()
         this.scrollToCurrent(this.currentSong)
       }, 20)
@@ -97,7 +97,13 @@ export default {
       const index = this.sequenceList.findIndex((song) => { // 找到当前播放歌曲在顺序列表中的索引（播放列表不管什么播放模式都是顺序列表展示）
         return current.id === song.id
       })
-      this.$refs.listContent.scrollToElement(this.$refs.listItem[index], 300) // 滚动到相应位置 300毫秒
+      /**
+       * bug修复说明：
+       * 使用this.$refs.listItem[index]在添加歌曲到队列后无法获取正确的li列表DOM，可能是因为li在scroll组件实例内部的DOM，
+       * 因此需通过使用$el的方式才能正确的获取到更新后的DOM
+       * this.$refs.list.$el.children[index]
+       */
+      this.$refs.listContent.scrollToElement(this.$refs.list.$el.children[index], 300) // 滚动到相应位置 300毫秒
     },
     deleteOne(item) {
       this.deleteSong(item)
