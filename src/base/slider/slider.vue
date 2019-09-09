@@ -12,7 +12,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { addClass } from 'common/js/dom'
+import { addClass } from '@/common/js/dom'
 import BScroll from 'better-scroll'
 export default {
   name: 'slider',
@@ -145,7 +145,7 @@ export default {
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~common/stylus/variable"
+  @import "~@/common/stylus/variable"
   .slider
     min-height: 1px
     .slider-group

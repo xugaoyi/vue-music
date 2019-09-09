@@ -40,7 +40,7 @@ import Scroll from '@/base/scroll/scroll'
 import Slider from '@/base/slider/slider'
 import { getRecommend, getDiscList } from '@/api/recommend'
 import { ERR_OK } from '@/api/config'
-import { playlistMixin } from 'common/js/mixin'
+import { playlistMixin } from '@/common/js/mixin'
 import { mapMutations } from 'vuex'
 
 export default {
@@ -100,7 +100,7 @@ export default {
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-@import '~common/stylus/variable'
+@import "~@/common/stylus/variable"
 
 .recommend {
   position: fixed;

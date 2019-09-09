@@ -32,7 +32,7 @@ import Singer from '@/common/js/singer'
 import NoResult from '@/base/no-result/no-result'
 import { search } from '@/api/search'
 import { ERR_OK } from '@/api/config'
-import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
+import { createSong, isValidMusic, processSongsUrl } from '@/common/js/song'
 import { mapMutations, mapActions } from 'vuex'
 
 const TYPE_SINGER = 'singer'
@@ -170,8 +170,8 @@ export default {
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~common/stylus/variable"
-  @import "~common/stylus/mixin"
+  @import "~@/common/stylus/variable"
+  @import "~@/common/stylus/mixin"
 
   .suggest
     height: 100%

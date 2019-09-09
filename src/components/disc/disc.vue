@@ -9,7 +9,7 @@ import MusicList from '@/components/music-list/music-list'
 import { getSongList } from '@/api/recommend' // 获取歌曲列表接口
 import { ERR_OK } from '@/api/config'
 import { mapGetters } from 'vuex'
-import { createSong, isValidMusic, processSongsUrl } from 'common/js/song'
+import { createSong, isValidMusic, processSongsUrl } from '@/common/js/song'
 
 export default {
   computed: {

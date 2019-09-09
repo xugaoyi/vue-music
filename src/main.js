@@ -8,6 +8,12 @@ import VueLazyLoad from 'vue-lazyload'
 
 import 'common/stylus/index.styl'
 
+// 移动端控制台console，测试完后注释代码。
+// import VConsole from 'vconsole'
+// /* eslint-disable no-unused-vars */
+// var vConsole = new VConsole()
+// console.log('test')
+
 fastclick.attach(document.body)
 
 Vue.use(VueLazyLoad, {

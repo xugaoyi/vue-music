@@ -37,7 +37,7 @@ import Switches from '@/base/switches/switches' // tab选项卡
 import Scroll from '@/base/scroll/scroll'
 import SongList from '@/base/song-list/song-list'
 import NoResult from '@/base/no-result/no-result'
-import Song from 'common/js/song'
+import Song from '@/common/js/song'
 import { mapGetters, mapActions } from 'vuex'
 import { playlistMixin } from '@/common/js/mixin'
 
@@ -115,7 +115,7 @@ export default {
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~common/stylus/variable"
+  @import "~@/common/stylus/variable"
 
   .user-center
     position: fixed

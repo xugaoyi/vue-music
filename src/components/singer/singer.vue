@@ -8,10 +8,10 @@
 <script type="text/ecmascript-6">
 import { getSingerList } from '@/api/singer'
 import { ERR_OK } from '@/api/config'
-import Singer from 'common/js/singer'
+import Singer from '@/common/js/singer'
 import ListView from '@/base/listview/listview'
 import { mapMutations } from 'vuex' // mapMutations 设置vuex数据的 语法糖‘
-import { playlistMixin } from 'common/js/mixin'
+import { playlistMixin } from '@/common/js/mixin'
 
 const HOT_NAME = '热门'
 const HOT_SINGER_LEN = 10

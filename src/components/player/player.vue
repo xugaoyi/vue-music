@@ -132,7 +132,7 @@ import { mapGetters, mapMutations, mapActions } from 'vuex' // 获取/设置vuex
 import animations from 'create-keyframe-animation' // 动画库依赖https://github.com/HenrikJoreteg/create-keyframe-animation
 import { prefixStyle } from '@/common/js/dom' // js操作css3样式前缀的封装
 import ProgressBar from '@/base/progress-bar/progress-bar' // 进度条组件
-import ProgressCircle from '@/base/progress-Circle/progress-Circle' // 圆形进度条组件
+import ProgressCircle from '@/base/progress-circle/progress-circle' // 圆形进度条组件
 import { playMode } from '@/common/js/config' // 播放模式语义化配置
 // import { shuffle } from '@/common/js/util' // 随机打乱数组方法
 import Lyric from 'lyric-parser' // 歌词解析器
@@ -493,8 +493,8 @@ export default {
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~common/stylus/variable"
-  @import "~common/stylus/mixin"
+  @import "~@/common/stylus/variable"
+  @import "~@/common/stylus/mixin"
 
   .player
     .normal-player
